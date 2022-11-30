@@ -3,15 +3,17 @@ import numpy as np
 import pandas as pd
 from scipy import signal
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 def visualize(X):
-    y = smooth(X)
-    ax = np.linspace(0, 24 , y.shape[0])  # X-Axis to plot 0-24H
-    print(ax.shape)
-    print(y.shape)
-    plt.plot(ax, y)
-    plt.savefig('foo.png', bbox_inches='tight')
+    ys = smooth(X)
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    xs = np.linspace(0, 24 , ys.shape[0])
+    axis.plot(xs, ys)
+    return fig
 
 
 

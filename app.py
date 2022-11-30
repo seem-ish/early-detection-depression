@@ -1,4 +1,5 @@
-
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pyrebase
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 import firebase_admin
@@ -9,15 +10,15 @@ from werkzeug.utils import secure_filename
 import os
 import warnings
 warnings.filterwarnings("ignore")
-import time
 
 cred = credentials.Certificate('mypykey.json')
 firebase_admin.initialize_app(cred)
 fsdb = firestore.client()
 
+
 app = Flask(__name__)       #Initialze flask constructor
 app.config['UPLOAD_DIRECTORY'] = 'static/files'
-app.config['UPLOAD_DIRECTORY'] = 'static/img'
+
 
 #Add your own details
 config = {
@@ -70,7 +71,6 @@ def result():
         try:
             #Try signing in the user with the given information
             user = auth.sign_in_with_email_and_password(email, password)
-            print('hi')
             #Insert the user data in the global person
             global person
             person["is_logged_in"] = True
@@ -79,9 +79,7 @@ def result():
 
             #Get the name of the user
             data = db.child("users").get()
-            print('hi')
             person["name"] = data.val()[person["uid"]]["name"]
-            print('hi')
             #Redirect to welcome page
             return redirect(url_for('welcome'))
         except:
@@ -139,12 +137,15 @@ def predict():
         file.save(flpath)
 
         X = preprocess(flpath)
-        model_rc = pickle.load(open('models/random_classifier_model.pkl', 'rb'))
-        print(model_rc.predict(X.reshape(1, -1)))
-        output = model_rc.predict_proba(X.reshape(1, -1))
-        time.sleep(10)
 
-        return render_template("welcome1.html", email=person["email"], name=person["name"],prediction_text=f'Percentage {output}',imgfl = imgflpath)
+        model_rc = pickle.load(open('models/random_classifier_model.pkl', 'rb'))
+        prediction = model_rc.predict(X.reshape(1, -1))
+        if prediction == 1:
+            output = model_rc.predict_proba(X.reshape(1, -1))
+            return render_template("welcome.html",prediction_text=f'The is a high probability - {output[0][1]} that you might be depressed',symptom_text= 'Looks like you are not getting enough activity',recommendation_text='Studies show that running just 5 to 10 minutes each day at a moderate pace may help reduce your risk of from heart attacks, strokes, and other common diseases. We suggest you to go for a run regularly')
+        else:
+            return render_template("welcome.html", prediction_text='You look in great shape')
+
     else:
         abort(400, "Error")
 

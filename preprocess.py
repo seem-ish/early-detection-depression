@@ -4,10 +4,8 @@ import pandas as pd
 import sympy as sym
 from sympy import *
 
-from visualize import visualize
 def preprocess(f_name):
     HH_MM, activity = gather_data(f_name)
-    visualize(activity)
     return feature_extract(activity)
 
 
