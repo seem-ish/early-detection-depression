@@ -25,16 +25,14 @@
     />
     <section id="event-details-container">
       <h1>Depression Detection</h1>
+        <form action="{{ url_for('signup')}}">
+    <input type="submit" value="Join Us!" />
+</form>
+
     </section>
 
     <hr />
-    <form action="{{ url_for('register')}}" method="POST">
-      <input type="text" id="name"  name="name" placeholder="name"></br>
-      <input type="email" id="login"  name="email" placeholder="email"></br>
-      <input type="password" id="password"  name="pass" placeholder="password"></br>
-      <input type="submit" value="Sign Up">
-    </form>
-<section id="description-container">
+  <section id="description-container">
       <h2>App Description</h2>
       <p>Helps in the early detection on depression
       We aim to develop an intelligent solution that will detect potential depression (short-term) and notify the person. We have built a ML -based solution for this. The solution recognises different human behavioral and lifestyle patterns, through data collected from wearable devices and smart phones. Our platform is intended to only detect potential depression (short-term). </br></br>
