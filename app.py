@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 import os
 import warnings
 warnings.filterwarnings("ignore")
+import time
 
 cred = credentials.Certificate('mypykey.json')
 firebase_admin.initialize_app(cred)
@@ -16,6 +17,7 @@ fsdb = firestore.client()
 
 app = Flask(__name__)       #Initialze flask constructor
 app.config['UPLOAD_DIRECTORY'] = 'static/files'
+app.config['UPLOAD_DIRECTORY'] = 'static/img'
 
 #Add your own details
 config = {
@@ -137,11 +139,12 @@ def predict():
         file.save(flpath)
 
         X = preprocess(flpath)
-        print(type(X))
         model_rc = pickle.load(open('models/random_classifier_model.pkl', 'rb'))
         print(model_rc.predict(X.reshape(1, -1)))
         output = model_rc.predict_proba(X.reshape(1, -1))
-        return render_template("welcome.html", email=person["email"], name=person["name"],prediction_text=f'Percentage {output}')
+        time.sleep(10)
+
+        return render_template("welcome1.html", email=person["email"], name=person["name"],prediction_text=f'Percentage {output}',imgfl = imgflpath)
     else:
         abort(400, "Error")
 
