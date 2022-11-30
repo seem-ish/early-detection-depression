@@ -1,0 +1,8 @@
+Flask
+pandas
+numpy
+scikit-learn
+sympy
+gunicorn
+pyrebase4
+firebase-admin=5.4.0
