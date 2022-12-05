@@ -116,11 +116,17 @@ def predict():
         X = preprocess(file_path)
         visualize(file_path)
 
-        file_path = "static/img/fig1.png"
 
-        bucket = storage.bucket()  # storage bucket
-        blob = bucket.blob(file_path)
-        blob.upload_from_filename(file_path)
+        # file_path = os.path.join(
+        #     app.config['UPLOAD_DIRECTORY'],
+        #     secure_filename(file.filename)
+        # )
+        # file.save(file_path)
+
+        #
+        # bucket = storage.bucket()  # storage bucket
+        # blob = bucket.blob(file_path)
+        # blob.upload_from_filename(file_path)
 
         model_rc = pickle.load(open('models/random_classifier_model.pkl', 'rb'))
         prediction = model_rc.predict(X.reshape(1, -1))
