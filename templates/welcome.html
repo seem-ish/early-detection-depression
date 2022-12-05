@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Depression Detection App</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link
     type="text/css"
@@ -20,21 +20,29 @@
 </head>
 <body>
   <div id="app">
-    <img
+    <img id="mainimg"
       src="https://i.ibb.co/S0hT7Gg/Team-10-Week-7-9-Project-Milestone-2-Implementation-Unit-Testing-pptx.png"
     />
+     <div class="parent">
     <section id="event-details-container">
-      <h1>Depression Detection</h1>
-    </section>
-
-    <hr />
-    <form action="{{ url_for('predict')}}" method="post" enctype="multipart/form-data">
+      <h1>{{ header_text }}</h1>
+      <form action="{{ url_for('predict')}}" method="post" enctype="multipart/form-data">
         <input type="file" name="file">
-        <input type="submit" value="Upload">
+        <input id = "upload" type="submit" value="Upload">
       </form>
-      <h3>{{prediction_text}}</h3>
-     <h4>{{symptom_text}}</h4>
-<p>{{recommendation_text}}</p>
+      <form action="{{ url_for('home')}}">
+    <input id="logout" type="submit" value="Log Out" />
+</form>
+    </section>
+    <hr />
+      </div>
+ <section id="description-container">
+      <h2>App Description</h2>
+      <p>Helps in the early detection on depression
+      We aim to develop an intelligent solution that will detect potential depression (short-term) and notify the person. We have built a ML -based solution for this. The solution recognises different human behavioral and lifestyle patterns, through data collected from wearable devices and smart phones. Our platform is intended to only detect potential depression (short-term). </br></br>
+<b>Disclaimer</b>: It can not be used as a replacement for any diagnosis and treatments from a certified healthcare professional.
+</p>
+    </section>
   </div>
 </body>
 </html>

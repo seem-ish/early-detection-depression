@@ -1,150 +1,141 @@
-import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import pyrebase
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+from flask import Flask, redirect, render_template, request, session, abort, url_for
+from firebase_admin import credentials, firestore, auth, storage
 import firebase_admin
-from firebase_admin import credentials,firestore
+import os
 import pickle
 from preprocess import preprocess
 from werkzeug.utils import secure_filename
-import os
-import warnings
-warnings.filterwarnings("ignore")
+from visualize import visualize
+
+from google.oauth2 import service_account
+
+import requests
+import json
 
 cred = credentials.Certificate('mypykey.json')
-firebase_admin.initialize_app(cred)
-fsdb = firestore.client()
+firebase_admin.initialize_app(cred, {'storageBucket': 'try-proj-f6f6c.appspot.com'})
+credentials = service_account.Credentials.from_service_account_file("mypykey.json")
 
+FIREBASE_WEB_API_KEY = "AIzaSyAqK3cVCo0q7-T_zfmPX-jWQgtnvgZ2Qrc"
+rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
 
-app = Flask(__name__)       #Initialze flask constructor
+app = Flask(__name__)  # Initialze flask constructor
 app.config['UPLOAD_DIRECTORY'] = 'static/files'
+app.config['UPLOAD_IMG'] = 'static/img'
+# Home Page
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html", header_text = "Depression Detection")
 
 
-#Add your own details
-config = {
-  "apiKey": "AIzaSyAqK3cVCo0q7-T_zfmPX-jWQgtnvgZ2Qrc",
-  "authDomain": "try-proj-f6f6c.firebaseapp.com",
-  "databaseURL": "",
-  "storageBucket": "try-proj-f6f6c.appspot.com"
-}
-
-#initialize firebase
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-
-db = firebase.database()
-
-#Initialze person as dictionary
-person = {"is_logged_in": False, "name": "", "email": "", "uid": ""}
-
-#Login
-@app.route("/")
-def login():
-    return render_template("index.html")
-
-#Sign up/ Register
+# After clicking on Join Us
 @app.route("/signup")
 def signup():
-    return render_template("signup.html")
+    return render_template("signup.html", header_text = "Depression Detection")
 
-#Welcome page
-@app.route("/welcome")
-def welcome():
-    if person["is_logged_in"] == True:
-        doc_ref = fsdb.collection(u'uses').document(u'alovelace')
-        doc_ref.set({
-            u'email': person["email"],
-            u'name': person["name"]
-        })
+# After clicking on Login
+@app.route("/loginpage")
+def loginpage():
+    return render_template("login.html", header_text = "Depression Detection")
 
-        return render_template("welcome.html", email = person["email"], name = person["name"])
-    else:
-        return redirect(url_for('login'))
 
-#If someone clicks on login, they are redirected to /result
-@app.route("/result", methods = ["POST", "GET"])
-def result():
-    if request.method == "POST":        #Only if data has been posted
-        result = request.form           #Get the data
-        email = result["email"]
-        password = result["pass"]
-        try:
-            #Try signing in the user with the given information
-            user = auth.sign_in_with_email_and_password(email, password)
-            #Insert the user data in the global person
-            global person
-            person["is_logged_in"] = True
-            person["email"] = user["email"]
-            person["uid"] = user["localId"]
+# Initialze person as dictionary
 
-            #Get the name of the user
-            data = db.child("users").get()
-            person["name"] = data.val()[person["uid"]]["name"]
-            #Redirect to welcome page
-            return redirect(url_for('welcome'))
-        except:
-            #If there is any error, redirect back to login
-            return redirect(url_for('login'))
-    else:
-        if person["is_logged_in"] == True:
-            return redirect(url_for('welcome'))
-        else:
-            return redirect(url_for('login'))
 
-#If someone clicks on register, they are redirected to /register
-@app.route("/register", methods = ["POST", "GET"])
+
+@app.route("/register", methods=["POST", "GET"])
 def register():
-    if request.method == "POST":        #Only listen to POST
-        result = request.form           #Get the data submitted
-        email = result["email"]
-        password = result["pass"]
-        name = result["name"]
+    if request.method == "POST":  # Only listen to POST
+        form = request.form  # Get the data submitted
+        global username
+        username = form["name"]
+        email = form["email"]
+        password = form["password"]
         try:
-            #Try creating the user account using the provided data
-            auth.create_user_with_email_and_password(email, password)
-            #Login the user
-            user = auth.sign_in_with_email_and_password(email, password)
-            #Add data to global person
-            global person
-            person["is_logged_in"] = True
-            person["email"] = user["email"]
-            person["uid"] = user["localId"]
-            person["name"] = name
-            #Append data to the firebase realtime database
-            data = {"name": name, "email": email}
-            db.child("users").child(person["uid"]).set(data)
-            #Go to welcome page
-            return redirect(url_for('welcome'))
+            auth.create_user(display_name=username, email=email, password=password)
+            payload = json.dumps({
+                "email": email,
+                "password": password,
+                "returnSecureToken": True
+            })
+            r = requests.post(rest_api_url,
+                              params={"key": FIREBASE_WEB_API_KEY},
+                              data=payload)
+            y = r.json()
+            return render_template("welcome.html", header_text = f"Welcome, {username}!")
         except:
-            #If there is any error, redirect to register
-            return redirect(url_for('register'))
+            return render_template("signup.html", header_text = "Depression Detection", existing_user="Email has been already used.")
 
-    else:
-        if person["is_logged_in"] == True:
-            return redirect(url_for('welcome'))
-        else:
-            return redirect(url_for('register'))
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":  # Only listen to POST
+        form = request.form  # Get the data submitted
+        email = form["email"]
+        password = form["password"]
+        try:
+            payload = json.dumps({
+                "email": email,
+                "password": password,
+                "returnSecureToken": True
+            })
+            r = requests.post(rest_api_url,
+                              params={"key": FIREBASE_WEB_API_KEY},
+                              data=payload)
+            y = r.json()
+            global username
+            username = y['displayName']
+            if "idToken" in y.keys():
+                return render_template("welcome.html", header_text = f"Welcome, {username}!")
+            else:
+                return render_template("login.html",header_text = "Depression Detection", invalid_password="Invalid Password")
+        except:
+            return render_template("login.html",header_text = "Depression Detection", invalid_password="No user found")
+
+
 
 @app.route("/predict", methods=['POST'])
 def predict():
     file = request.files['file']
 
     if file:
-        flpath = os.path.join(
+        file_path = os.path.join(
             app.config['UPLOAD_DIRECTORY'],
             secure_filename(file.filename)
         )
-        file.save(flpath)
+        file.save(file_path)
 
-        X = preprocess(flpath)
+        bucket = storage.bucket()  # storage bucket
+        blob = bucket.blob(file_path)
+        blob.upload_from_filename(file_path)
+
+        # files = gstore.Client(credentials=credentials).list_blobs(
+        #     storage.bucket().name)  # fetch all the files in the bucket
+        # for i in files: print('The public url is ', i.public_url)
+
+        X = preprocess(file_path)
+        visualize(file_path)
+
+        file_path = "static/img/fig1.png"
+
+        bucket = storage.bucket()  # storage bucket
+        blob = bucket.blob(file_path)
+        blob.upload_from_filename(file_path)
 
         model_rc = pickle.load(open('models/random_classifier_model.pkl', 'rb'))
         prediction = model_rc.predict(X.reshape(1, -1))
+        output = model_rc.predict_proba(X.reshape(1, -1))
         if prediction == 1:
-            output = model_rc.predict_proba(X.reshape(1, -1))
-            return render_template("welcome.html",prediction_text=f'The is a high probability - {output[0][1]} that you might be depressed',symptom_text= 'Looks like you are not getting enough activity',recommendation_text='Studies show that running just 5 to 10 minutes each day at a moderate pace may help reduce your risk of from heart attacks, strokes, and other common diseases. We suggest you to go for a run regularly')
+
+            return render_template("welcome1.html", header_text = f"Welcome, {username}!",
+                                   prediction_text=f'There is a high probability - {output[0][1]} that you might be depressed',
+                                   symptom_text='Looks like you are not getting enough activity',
+                                   recommendation_text='Studies show that running just 5 to 10 minutes each day at a moderate pace may help you. We suggest you to go for a run regularly.',
+                                   img_src="../static/img/fig1.png")
         else:
-            return render_template("welcome.html", prediction_text='You look in great shape')
+            return render_template("welcome1.html", header_text = f"Welcome, {username}!", prediction_text='You look in great shape, keep it up!',
+                                   symptom_text='Your activity chart shows that you are getting enough activity',
+                                   img_src="../static/img/fig1.png")
 
     else:
         abort(400, "Error")

@@ -4,6 +4,7 @@ import pandas as pd
 import sympy as sym
 from sympy import *
 
+
 def preprocess(f_name):
     HH_MM, activity = gather_data(f_name)
     return feature_extract(activity)

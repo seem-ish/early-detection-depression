@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Depression Detection App</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link
     type="text/css"
@@ -20,20 +20,25 @@
 </head>
 <body>
   <div id="app">
-    <img
+    <img id="mainimg"
       src="https://i.ibb.co/S0hT7Gg/Team-10-Week-7-9-Project-Milestone-2-Implementation-Unit-Testing-pptx.png"
     />
+    <div class="parent">
     <section id="event-details-container">
-      <h1>Depression Detection</h1>
+      <div id="signupform">
+      <h1>{{ header_text }}</h1>
+      <form id = "signup-form" action="{{ url_for('register')}}" method="POST">
+      <input class="wrap" type="text" id="name"  name="name" placeholder="Full Name"></br>
+      <input class="wrap" type="email" id="email"  name="email" placeholder="Email"></br>
+      <input class="wrap" type="password" id="password"  name="password" placeholder="Password"></br>
+      <input class="wrap" id = "signup" type="submit" value="Sign Up">
+    </form>
+                <p> {{ existing_user }}</p>
+      </div>
     </section>
+      </div>
 
     <hr />
-    <form action="{{ url_for('register')}}" method="POST">
-      <input type="text" id="name"  name="name" placeholder="name"></br>
-      <input type="email" id="login"  name="email" placeholder="email"></br>
-      <input type="password" id="password"  name="pass" placeholder="password"></br>
-      <input type="submit" value="Sign Up">
-    </form>
 <section id="description-container">
       <h2>App Description</h2>
       <p>Helps in the early detection on depression

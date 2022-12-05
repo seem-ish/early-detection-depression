@@ -1,34 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Pyrebase-Flask-Login</title>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'main.css') }}">
+	<title>Depression Detection App</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link
+    type="text/css"
+    rel="stylesheet"
+    href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Roboto:300,400,700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
 </head>
 <body>
-<div class="wrapper fadeInDown">
-  <div id="formContent">
-    <!-- Tabs Titles -->
-    <h2 class="active"> Sign In </h2>
-    <a href="http://127.0.0.1:5000/signup"><h2 class="inactive underlineHover">Sign Up </h2></a>
-
-    <!-- Icon -->
-    <div class="fadeIn first">
-      <img src="{{ url_for('static', filename = 'user.png') }}" id="icon" alt="User Icon" />
-    </div>
-
-    <!-- Login Form -->
-    <form action="http://127.0.0.1:5000/result" method="POST">
-      <input type="email" id="login" class="fadeIn second" name="email" placeholder="email">
-      <input type="password" id="password" class="fadeIn third" name="pass" placeholder="password">
-      <input type="submit" class="fadeIn fourth" value="Log In">
+  <div id="app">
+    <img id="mainimg"
+      src="https://i.ibb.co/S0hT7Gg/Team-10-Week-7-9-Project-Milestone-2-Implementation-Unit-Testing-pptx.png"
+    />
+    <div class="parent">
+    <section id="event-details-container">
+      <div id="signupform">
+      <h1>{{ header_text }}</h1>
+      <form id = "signup-form" action="{{ url_for('login')}}" method="POST">
+      <input class="wrap" type="email" id="email"  name="email" placeholder="Email"></br>
+      <input class="wrap" type="password" id="password"  name="password" placeholder="Password"></br>
+      <input class="wrap" id = "signup" type="submit" value="Log In">
     </form>
-<!--
-	Will add in future
-    <div id="formFooter">
-      <a class="underlineHover" href="#">Forgot Password?</a>
-    </div>
- -->
+        <p> {{ invalid_password }}</p>
+      </div>
+    </section>
+      </div>
+
+    <hr />
+<section id="description-container">
+      <h2>App Description</h2>
+      <p>Helps in the early detection on depression
+      We aim to develop an intelligent solution that will detect potential depression (short-term) and notify the person. We have built a ML -based solution for this. The solution recognises different human behavioral and lifestyle patterns, through data collected from wearable devices and smart phones. Our platform is intended to only detect potential depression (short-term). </br></br>
+<b>Disclaimer</b>: It can not be used as a replacement for any diagnosis and treatments from a certified healthcare professional.
+</p>
+    </section>
   </div>
-</div>
 </body>
 </html>

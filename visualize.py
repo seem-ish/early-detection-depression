@@ -7,20 +7,21 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 
-def visualize(X):
-    ys = smooth(X)
-    fig = Figure()
-    axis = fig.add_subplot(1, 1, 1)
-    xs = np.linspace(0, 24 , ys.shape[0])
-    axis.plot(xs, ys)
-    return fig
-
-
-
-def smooth(day):
-    L = 30  # L-point Moving Average filter
-    b = (np.ones(L)) / L  # numerator co-effs of filter transfer function
-    a = np.ones(1)  # denominator co-effs of filter transfer function
-    x = day
-    y = signal.lfilter(b, a, x)  # filter output using lfilter function
-    return y
+def visualize(file_path):
+    df = pd.read_csv(file_path, sep='\t')
+    df.timestamp = df.timestamp.str.split(' ', expand=True)[[1]]
+    df['hour'] = df.timestamp.str.split(':', expand=True)[[0]]
+    ab = df.groupby(['date', 'hour'])['activity'].mean()
+    df_aggr = pd.DataFrame(columns=('date', 'hour', 'activity'))
+    date = ''
+    for i in range(0, len(ab)):
+        df_aggr = df_aggr.append({'date': ab.index[i][0], 'hour': ab.index[i][1], 'activity': ab[i]},
+                                 ignore_index=True)
+        date = ab.index[i][0]
+    plt.figure()
+    plt.plot(df_aggr['hour'], df_aggr['activity'])
+    plt.xlabel('Hour')
+    plt.ylabel('Activity')
+    plt.ylim([0, 800])
+    plt.title(f'Your Mean Activity chart for {date}')
+    plt.savefig('static/img/fig1.png')
